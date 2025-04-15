@@ -56,6 +56,8 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth)
 
     // Hilt Android
     implementation(libs.hilt.android)
@@ -78,6 +80,8 @@ dependencies {
 
     // OkHttp Logging Interceptor for network request debugging
     implementation(libs.logging.interceptor)
+
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
