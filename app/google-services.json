@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "500609887236",
+    "project_id": "lostintravel-71460",
+    "storage_bucket": "lostintravel-71460.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500609887236:android:966791680f2d0c88001951",
+        "android_client_info": {
+          "package_name": "com.chrisroid.lostintravel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxQKIYMkMfGuDMXn__N9iYfeLxG00eBMo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
