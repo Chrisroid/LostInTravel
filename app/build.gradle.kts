@@ -61,9 +61,24 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
-    // Hilt ViewModel (if using)
+    // Hilt ViewModel
     implementation(libs.androidx.hilt.navigation.compose) // For Compose integration
     kapt(libs.androidx.hilt.compiler)
+
+    // Lottie for placeholder animations
+    implementation(libs.lottie)
+
+    // Retrofit for networking
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // Glide for image loading
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
+
+    // OkHttp Logging Interceptor for network request debugging
+    implementation(libs.logging.interceptor)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
