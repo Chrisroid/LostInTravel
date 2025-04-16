@@ -2,6 +2,7 @@ package com.chrisroid.lostintravel.ui.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -65,18 +66,21 @@ import kotlin.random.Random
 @Composable
 fun HomeScreen(
     onSignOut: () -> Unit,
+    onNavigateToDetail: (Place) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val destinations by viewModel.destinations.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    HomeScreen2()
+    HomeScreen2(
+        onNavigateToDetail = onNavigateToDetail
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen2(userName: String = "Samira") {
+fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -204,7 +208,8 @@ fun HomeScreen2(userName: String = "Samira") {
             itemsIndexed(frequentlyVisited) { index, place ->
                 PlaceCardHorizontal(
                     place = place,
-                    isFavorite = favorites[index]
+                    isFavorite = favorites[index],
+                    onClick = { onNavigateToDetail(place) }
                 )
             }
         }
@@ -229,7 +234,8 @@ fun HomeScreen2(userName: String = "Samira") {
             itemsIndexed(recommendedPlaces) {index, place ->
                 PlaceCardVertical(
                     place = place,
-                    isFavorite = favorites1[index]
+                    isFavorite = favorites1[index],
+                    onClick = { onNavigateToDetail(place) }
                 )
             }
         }
@@ -258,9 +264,11 @@ val recommendedPlaces = listOf(
 )
 
 @Composable
-fun PlaceCardHorizontal(place: Place, isFavorite: Boolean) {
+fun PlaceCardHorizontal(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.width(180.dp),
+        modifier = Modifier
+            .width(180.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -361,11 +369,12 @@ fun PlaceCardHorizontal(place: Place, isFavorite: Boolean) {
 
 
 @Composable
-fun PlaceCardVertical(place: Place, isFavorite: Boolean) {
+fun PlaceCardVertical(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 6.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)

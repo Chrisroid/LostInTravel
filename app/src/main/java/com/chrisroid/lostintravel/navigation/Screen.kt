@@ -8,9 +8,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.chrisroid.lostintravel.ui.home.DetailScreen
 import com.chrisroid.lostintravel.viewmodel.AuthViewModel
 
 
@@ -52,8 +55,18 @@ fun LostInTravelApp() {
             HomeScreen(
                 onSignOut = {
                     authViewModel.signOut()
+                },
+                onNavigateToDetail = { place ->
+                    navController.navigate("detail/${place.title}")
                 }
             )
+        }
+        composable(
+            "detail/{title}",
+            arguments = listOf(navArgument("title") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val title = backStackEntry.arguments?.getString("title") ?: ""
+            DetailScreen(placeTitle = title, navController = navController)
         }
     }
 }
