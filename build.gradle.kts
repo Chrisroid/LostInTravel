@@ -5,4 +5,5 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.google.services) apply false
     id("com.google.dagger.hilt.android") version "2.52" apply false
+    id ("com.apollographql.apollo3") version "3.8.5" apply false
 }

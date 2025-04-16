@@ -1,29 +1,17 @@
 package com.chrisroid.lostintravel.ui.auth
 
-import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chrisroid.lostintravel.R
 import com.chrisroid.lostintravel.viewmodel.AuthState
 import com.chrisroid.lostintravel.viewmodel.AuthViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun LoginScreen(
@@ -34,42 +22,20 @@ fun LoginScreen(
     val authState by viewModel.authState.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        try {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            val account = task.getResult(ApiException::class.java)
-            account?.idToken?.let { token ->
-                // Log the token
-                println("Google ID Token: $token") // for debug builds
-                // OR use Log.d for logcat
-                Log.d("LoginScreen", "Google ID Token: $token")
+    var isSignup by remember { mutableStateOf(false) }
 
-                viewModel.signInWithGoogle(token)
-            }
-                ?: run {
-                viewModel.handleSignInError("Google sign-in failed: No ID token received")
-            }
-        } catch (e: ApiException) {
-            viewModel.handleSignInError("Google sign-in failed: ${e.message}")
-        }
-    }
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     LaunchedEffect(authState) {
         when (authState) {
-            is AuthState.Success -> {
-                if (isLoggedIn) {
-                    onLoginSuccess()
-                }
-            }
-            is AuthState.Error -> {
-                Toast.makeText(
-                    context,
-                    (authState as AuthState.Error).message,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            is AuthState.Success -> if (isLoggedIn) onLoginSuccess()
+            is AuthState.Error -> Toast.makeText(
+                context,
+                (authState as AuthState.Error).message,
+                Toast.LENGTH_SHORT
+            ).show()
             else -> {}
         }
     }
@@ -77,19 +43,48 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (isSignup) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Full Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         Button(
             onClick = {
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(context.getString(R.string.default_web_client_id))
-                    .requestEmail()
-                    .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
+                if (isSignup) {
+                    viewModel.signUp(name.trim(), email.trim(), password.trim())
+                } else {
+                    viewModel.loginWithEmail(email.trim(), password.trim())
+                }
             },
+            modifier = Modifier.fillMaxWidth(),
             enabled = authState != AuthState.Loading
         ) {
             if (authState == AuthState.Loading) {
@@ -100,7 +95,14 @@ fun LoginScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Text("Continue with Google")
+            Text(if (isSignup) "Create Account" else "Login")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = { isSignup = !isSignup }) {
+            Text(if (isSignup) "Already have an account? Log in" else "No account? Sign up")
         }
     }
 }
+

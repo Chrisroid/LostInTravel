@@ -1,0 +1,10 @@
+query GetRecommendedPlaces {
+    RecommendedPlaces {
+        _id
+        leadingDestinationTitle
+        subDestinationTitle
+        description
+        price
+        imageUrl
+    }
+}

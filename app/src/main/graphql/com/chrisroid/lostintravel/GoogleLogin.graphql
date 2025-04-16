@@ -1,0 +1,5 @@
+mutation GoogleLogin($access_token: String!) {
+    GoogleLogin(input: { access_token: $access_token }) {
+        token
+    }
+}

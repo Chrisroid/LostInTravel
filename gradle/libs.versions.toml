@@ -1,5 +1,6 @@
 [versions]
 accompanistSwiperefresh = "0.33.2-alpha"
+apollo = "3.8.5"
 agp = "8.8.0"
 coilCompose = "2.5.0"
 compiler = "4.16.0"
@@ -81,6 +82,8 @@ lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
+apollo-runtime = { module = "com.apollographql.apollo3:apollo-runtime", version.ref = "apollo" }
+apollo-normalized-cache = { module = "com.apollographql.apollo3:apollo-normalized-cache-sqlite", version.ref = "apollo" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

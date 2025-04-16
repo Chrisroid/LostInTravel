@@ -1,4 +1,5 @@
 import com.android.tools.r8.internal.kt
+import org.gradle.declarative.dsl.schema.FqName.Empty.packageName
 
 plugins {
     alias(libs.plugins.android.application)
@@ -6,7 +7,18 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
     id("com.google.dagger.hilt.android")
+    id("com.apollographql.apollo3").version("3.8.5")
     kotlin("kapt")
+}
+
+apollo {
+   service("service"){
+       packageName.set("com.chrisroid.lostintravel")
+       introspection {
+           endpointUrl.set("https://lostapi.frontendlabs.co.uk/graphql") 
+           schemaFile.set(file("src/main/graphql/com/chrisroid/lostintravel/schema.graphqls"))
+       }
+   }
 }
 
 android {
@@ -108,6 +120,9 @@ dependencies {
     implementation (libs.kotlinx.coroutines.android)
 
     implementation (libs.accompanist.swiperefresh)
+
+    implementation(libs.apollo.runtime)
+    implementation(libs.apollo.normalized.cache)
 
 
     testImplementation(libs.junit)

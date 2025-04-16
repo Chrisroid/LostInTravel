@@ -2,9 +2,12 @@ package com.chrisroid.lostintravel.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chrisroid.lostintravel.GetRecommendedPlacesQuery
 import com.chrisroid.lostintravel.data.api.TravelApiService
+import com.chrisroid.lostintravel.data.repository.AuthRepository
 import com.chrisroid.lostintravel.domain.model.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,10 +17,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val apiService: TravelApiService
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _destinations = MutableStateFlow<List<Destination>>(emptyList())
     val destinations: StateFlow<List<Destination>> = _destinations
+
+    var graphQLResponseModel: MutableLiveData<List<GetRecommendedPlacesQuery.RecommendedPlace?>?> = MutableLiveData()
+
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -33,9 +39,11 @@ class HomeViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
             try {
-                _destinations.value = apiService.getRecommendedPlaces()
+                val apiResponse = authRepository.getRecommendedPlaces()
+                graphQLResponseModel.postValue(apiResponse)
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to load destinations"
+//                _isLoading.value = false
             } finally {
                 _isLoading.value = false
             }
