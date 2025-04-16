@@ -1,5 +1,6 @@
 package com.chrisroid.lostintravel.ui.auth
 
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,8 +41,14 @@ fun LoginScreen(
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let { token ->
+                // Log the token
+                println("Google ID Token: $token") // for debug builds
+                // OR use Log.d for logcat
+                Log.d("LoginScreen", "Google ID Token: $token")
+
                 viewModel.signInWithGoogle(token)
-            } ?: run {
+            }
+                ?: run {
                 viewModel.handleSignInError("Google sign-in failed: No ID token received")
             }
         } catch (e: ApiException) {
