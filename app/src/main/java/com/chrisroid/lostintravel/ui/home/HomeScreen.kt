@@ -6,17 +6,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,13 +30,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -46,6 +58,7 @@ import coil.compose.AsyncImage
 import com.chrisroid.lostintravel.domain.model.Destination
 import com.chrisroid.lostintravel.viewmodel.HomeViewModel
 import com.chrisroid.lostintravel.R
+import kotlin.random.Random
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +74,7 @@ fun HomeScreen(
     HomeScreen2()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen2(userName: String = "Samira") {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
@@ -109,46 +123,92 @@ fun HomeScreen2(userName: String = "Samira") {
                 }
             }
             Row {
-                IconButton(onClick = {}) {
-                    Image(
-                        painter = painterResource(id = R.drawable.message), // replace with your actual drawable name
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color(0x0D007AFF), shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
+                        Image(
+                            painter = painterResource(id = R.drawable.message),
+                            contentDescription = null
+                        )
+                    }
                 }
-                IconButton(onClick = {}) {
-                    Icon(Icons.Outlined.Notifications, contentDescription = null)
+
+                Spacer(modifier = Modifier.width(8.dp)) // Optional spacing between buttons
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color(0x0D007AFF), shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Outlined.Notifications, contentDescription = null)
+                    }
                 }
             }
+
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Search Bar
-        Box(
+        var searchText by remember { mutableStateOf("") }
+
+        TextField(
+            value = searchText,
+            onValueChange = { searchText = it },
+            placeholder = { Text("Search for places", color = Color.Gray) },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFF5F7FA), RoundedCornerShape(12.dp))
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Search for places", color = Color.Gray)
-            }
-        }
+                .background(Color(0xFFF5F7FA), shape = RoundedCornerShape(12.dp)),
+            colors = TextFieldDefaults.colors(
+                selectionColors = LocalTextSelectionColors.current,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                focusedContainerColor = Color(0xFF007AFF).copy(alpha = 0.05f),
+                unfocusedContainerColor = Color(0xFF007AFF).copy(alpha = 0.05f),
+            ),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true
+        )
+
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Frequently Visited
-        Text("Frequently Visited", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Frequently Visited",
+            style = TextStyle(
+                fontFamily = FontFamily(Font(R.font.google_sans_regular)),
+                fontWeight = FontWeight.Normal,
+                fontSize = 18.sp,
+                lineHeight = 14.sp,
+                letterSpacing = (-0.17).sp,
+                textAlign = TextAlign.Center
+            ),
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
+        val favorites = remember {
+            List(frequentlyVisited.size) { Random.nextBoolean() }
+        }
+
         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(frequentlyVisited) {
-                PlaceCardHorizontal(place = it)
+            itemsIndexed(frequentlyVisited) { index, place ->
+                PlaceCardHorizontal(
+                    place = place,
+                    isFavorite = favorites[index]
+                )
             }
         }
+
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -171,38 +231,6 @@ fun HomeScreen2(userName: String = "Samira") {
 }
 
 
-@Composable
-fun DestinationCard(destination: Destination) {
-    Card(
-        modifier = Modifier
-            .width(200.dp)
-            .height(250.dp),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column {
-            AsyncImage(
-                model = destination.imageUrl,
-                contentDescription = destination.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = destination.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            Text(
-                text = destination.country,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-        }
-    }
-}
-
 
 data class Place(
     val title: String,
@@ -212,9 +240,9 @@ data class Place(
 )
 
 val frequentlyVisited = listOf(
-    Place("Mykonos", "Chora, Greece", "$1800", R.drawable.kigali),
-    Place("Waterfort", "Venesia, Italy", "$1800", R.drawable.maldives),
-    Place("Delli", "Chora, Greece", "$1800", R.drawable.sumbing)
+    Place("Mykonos", "Chora, Greece", "1800", R.drawable.kigali),
+    Place("Waterfort", "Venesia, Italy", "1800", R.drawable.maldives),
+    Place("Delli", "Chora, Greece", "1800", R.drawable.sumbing)
 )
 
 val recommendedPlaces = listOf(
@@ -224,30 +252,107 @@ val recommendedPlaces = listOf(
 )
 
 @Composable
-fun PlaceCardHorizontal(place: Place) {
-    Column(
-        modifier = Modifier
-            .width(160.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
+fun PlaceCardHorizontal(place: Place, isFavorite: Boolean) {
+    Card(
+        modifier = Modifier.width(180.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Image(
-            painter = painterResource(place.image),
-            contentDescription = null,
+        Column(
             modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(place.title, style = MaterialTheme.typography.bodyMedium)
-            Text(place.location, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Text("${place.price}/person", color = Color.Blue, fontSize = 12.sp)
+                .width(180.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White)
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(120.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = place.image),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (isFavorite) Color.Red else Color.Gray,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = place.title,
+                        fontFamily = FontFamily(Font(R.font.google_sans_regular)),
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 18.sp,
+                        color = Color.Black
+                    )
+
+                    Text(
+                        text = "$${place.price}",
+                        color = Color(0xFF007AFF),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                }
+
+
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            tint = Color.Red,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = place.location,
+                            color = Color.Gray,
+                            fontSize = 16.sp
+                        )
+                    }
+
+                    Text(
+                        text = " /person",
+                        color = Color.LightGray,
+                        fontSize = 16.sp,
+                    )
+                }
+
+
+
+
+
+
+            }
         }
     }
 }
+
 
 @Composable
 fun PlaceCardVertical(place: Place) {
