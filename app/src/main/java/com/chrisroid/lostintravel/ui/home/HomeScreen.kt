@@ -35,6 +35,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,10 +60,15 @@ import coil.compose.AsyncImage
 import com.chrisroid.lostintravel.domain.model.Destination
 import com.chrisroid.lostintravel.viewmodel.HomeViewModel
 import com.chrisroid.lostintravel.R
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onSignOut: () -> Unit,
@@ -78,165 +84,185 @@ fun HomeScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        Spacer(modifier = Modifier.height(24.dp))
 
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                )
+    var isRefreshing by remember { mutableStateOf(false) }
 
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text(
-                        text = "Welcome $userName,",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontFamily = GoogleSansDisplay,
-                            fontWeight = FontWeight.W400,
-                            fontSize = 18.sp,
-                            lineHeight = 14.sp,
-                            letterSpacing = (-0.17).sp,
-                            textAlign = TextAlign.Center
-                        ),
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
+
+    // Run side effect when refreshing is triggered
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            delay(1500) // simulate refresh
+            isRefreshing = false
+        }
+    }
+
+    SwipeRefresh(
+        state = swipeRefreshState,
+        onRefresh = {
+            isRefreshing = true
+        }
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
                     )
-                    Text(
-                        text = "Where do you want to go?",
-                        style = TextStyle(
-                            fontFamily = FontFamily(Font(R.font.google_sans_regular)), // Make sure font is in res/font
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp,
-                            lineHeight = 10.sp,
-                            letterSpacing = (-0.17).sp,
-                            textAlign = TextAlign.Center,
-                            color = Color.Gray
-                        ),
-                    )
-                }
-            }
-            Row {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0x0D007AFF), shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                        Image(
-                            painter = painterResource(id = R.drawable.message),
-                            contentDescription = null
+
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "Welcome $userName,",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = GoogleSansDisplay,
+                                fontWeight = FontWeight.W400,
+                                fontSize = 18.sp,
+                                lineHeight = 14.sp,
+                                letterSpacing = (-0.17).sp,
+                                textAlign = TextAlign.Center
+                            ),
+                        )
+                        Text(
+                            text = "Where do you want to go?",
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(R.font.google_sans_regular)), // Make sure font is in res/font
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 14.sp,
+                                lineHeight = 10.sp,
+                                letterSpacing = (-0.17).sp,
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray
+                            ),
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.width(8.dp)) // Optional spacing between buttons
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0x0D007AFF), shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Outlined.Notifications, contentDescription = null)
+                Row {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0x0D007AFF), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
+                            Image(
+                                painter = painterResource(id = R.drawable.message),
+                                contentDescription = null
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.width(8.dp)) // Optional spacing between buttons
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0x0D007AFF), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Outlined.Notifications, contentDescription = null)
+                        }
+                    }
+                }
+
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            var searchText by remember { mutableStateOf("") }
+
+            TextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                placeholder = { Text("Search for places", color = Color.Gray) },
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFF5F7FA), shape = RoundedCornerShape(12.dp)),
+                colors = TextFieldDefaults.colors(
+                    selectionColors = LocalTextSelectionColors.current,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color(0xFF007AFF).copy(alpha = 0.05f),
+                    unfocusedContainerColor = Color(0xFF007AFF).copy(alpha = 0.05f),
+                ),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Frequently Visited
+            Text(
+                text = "Frequently Visited",
+                style = TextStyle(
+                    fontFamily = FontFamily(Font(R.font.google_sans_regular)),
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,
+                    lineHeight = 14.sp,
+                    letterSpacing = (-0.17).sp,
+                    textAlign = TextAlign.Center
+                ),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val favorites = remember {
+                List(frequentlyVisited.size) { Random.nextBoolean() }
+            }
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                itemsIndexed(frequentlyVisited) { index, place ->
+                    PlaceCardHorizontal(
+                        place = place,
+                        isFavorite = favorites[index],
+                        onClick = { onNavigateToDetail(place) }
+                    )
                 }
             }
 
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        var searchText by remember { mutableStateOf("") }
-
-        TextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            placeholder = { Text("Search for places", color = Color.Gray) },
-            leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFF5F7FA), shape = RoundedCornerShape(12.dp)),
-            colors = TextFieldDefaults.colors(
-                selectionColors = LocalTextSelectionColors.current,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                focusedContainerColor = Color(0xFF007AFF).copy(alpha = 0.05f),
-                unfocusedContainerColor = Color(0xFF007AFF).copy(alpha = 0.05f),
-            ),
-            shape = RoundedCornerShape(12.dp),
-            singleLine = true
-        )
-
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Frequently Visited
-        Text(
-            text = "Frequently Visited",
-            style = TextStyle(
-                fontFamily = FontFamily(Font(R.font.google_sans_regular)),
-                fontWeight = FontWeight.Normal,
-                fontSize = 18.sp,
-                lineHeight = 14.sp,
-                letterSpacing = (-0.17).sp,
-                textAlign = TextAlign.Center
-            ),
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val favorites = remember {
-            List(frequentlyVisited.size) { Random.nextBoolean() }
-        }
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            itemsIndexed(frequentlyVisited) { index, place ->
-                PlaceCardHorizontal(
-                    place = place,
-                    isFavorite = favorites[index],
-                    onClick = { onNavigateToDetail(place) }
-                )
+            // Recommended Places
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Recommended Places", style = MaterialTheme.typography.titleMedium)
+                Text("Explore All", color = Color.Blue, fontSize = 14.sp)
             }
-        }
+            Spacer(modifier = Modifier.height(8.dp))
 
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Recommended Places
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Recommended Places", style = MaterialTheme.typography.titleMedium)
-            Text("Explore All", color = Color.Blue, fontSize = 14.sp)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val favorites1 = remember {
-            List(frequentlyVisited.size) { Random.nextBoolean() }
-        }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            itemsIndexed(recommendedPlaces) {index, place ->
-                PlaceCardVertical(
-                    place = place,
-                    isFavorite = favorites1[index],
-                    onClick = { onNavigateToDetail(place) }
-                )
+            val favorites1 = remember {
+                List(frequentlyVisited.size) { Random.nextBoolean() }
+            }
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                itemsIndexed(recommendedPlaces) { index, place ->
+                    PlaceCardVertical(
+                        place = place,
+                        isFavorite = favorites1[index],
+                        onClick = { onNavigateToDetail(place) }
+                    )
+                }
             }
         }
     }
