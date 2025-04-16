@@ -222,9 +222,15 @@ fun HomeScreen2(userName: String = "Samira") {
         }
         Spacer(modifier = Modifier.height(8.dp))
 
+        val favorites1 = remember {
+            List(frequentlyVisited.size) { Random.nextBoolean() }
+        }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(recommendedPlaces) {
-                PlaceCardVertical(place = it)
+            itemsIndexed(recommendedPlaces) {index, place ->
+                PlaceCardVertical(
+                    place = place,
+                    isFavorite = favorites1[index]
+                )
             }
         }
     }
@@ -246,9 +252,9 @@ val frequentlyVisited = listOf(
 )
 
 val recommendedPlaces = listOf(
-    Place("Kigali Resort", "Kigali, Rwanda", "$1350", R.drawable.kigali),
-    Place("Maldives", "Rep of Maldives", "$1350", R.drawable.maldives),
-    Place("Sumbing Mount", "Chora, Greece", "$1350", R.drawable.sumbing)
+    Place("Kigali Resort", "Kigali, Rwanda", "1350", R.drawable.kigali),
+    Place("Maldives", "Rep of Maldives", "1350", R.drawable.maldives),
+    Place("Sumbing Mount", "Chora, Greece", "1350", R.drawable.sumbing)
 )
 
 @Composable
@@ -355,28 +361,87 @@ fun PlaceCardHorizontal(place: Place, isFavorite: Boolean) {
 
 
 @Composable
-fun PlaceCardVertical(place: Place) {
-    Row(
+fun PlaceCardVertical(place: Place, isFavorite: Boolean) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
-            .padding(8.dp)
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Image(
-            painter = painterResource(place.image),
-            contentDescription = null,
+        Row(
             modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(10.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(place.title, style = MaterialTheme.typography.bodyMedium)
-            Text(place.location, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = place.image),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Text(
+                    text = place.title,
+                    fontFamily = FontFamily(Font(R.font.google_sans_regular)),
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Place,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = place.location,
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Icon(
+                    imageVector = Icons.Outlined.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (isFavorite) Color.Red else Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = "$${place.price}",
+                        color = Color(0xFF007AFF),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "/person",
+                        color = Color.LightGray,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 2.dp)
+                    )
+                }
+            }
         }
-        Text("${place.price}/person", color = Color.Blue, fontSize = 12.sp)
     }
 }
 
