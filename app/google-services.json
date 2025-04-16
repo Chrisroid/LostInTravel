@@ -12,7 +12,20 @@
           "package_name": "com.chrisroid.lostintravel"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "500609887236-cq4sb1k1uoktda5ti9lri88dno3k92c9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chrisroid.lostintravel",
+            "certificate_hash": "d1334f4327f6965b2b0736d433d4a3061daeb5ab"
+          }
+        },
+        {
+          "client_id": "500609887236-mhjjnmcb7g6aim45fll97u0i8j3p0v3p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDxQKIYMkMfGuDMXn__N9iYfeLxG00eBMo"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "500609887236-mhjjnmcb7g6aim45fll97u0i8j3p0v3p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

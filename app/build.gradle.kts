@@ -1,8 +1,10 @@
+import com.android.tools.r8.internal.kt
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
     id("com.google.dagger.hilt.android")
     kotlin("kapt")
 }
@@ -52,11 +54,25 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation (libs.androidx.foundation)
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
+    implementation (libs.androidx.navigation.compose)
 
+    // For StateFlow.collectAsState()
+    implementation (libs.androidx.lifecycle.runtime.compose)
+
+    // OR if you're using LiveData
+    implementation (libs.androidx.runtime.livedata)
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.auth.ktx)
+    implementation (libs.google.firebase.auth.ktx)
+    implementation (libs.play.services.auth)
+
+    // Also add the dependencies for the Credential Manager libraries and specify their versions
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     implementation(libs.play.services.auth)
 
     // Hilt Android
@@ -77,11 +93,19 @@ dependencies {
     // Glide for image loading
     implementation(libs.glide)
     annotationProcessor(libs.compiler)
+    implementation (libs.coil.compose)
+
 
     // OkHttp Logging Interceptor for network request debugging
     implementation(libs.logging.interceptor)
 
     implementation(libs.androidx.datastore.preferences)
+    // DataStore
+    implementation (libs.androidx.datastore.core)
+
+    // Coroutines (required for DataStore)
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

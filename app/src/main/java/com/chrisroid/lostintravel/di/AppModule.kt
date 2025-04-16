@@ -1,12 +1,14 @@
 package com.chrisroid.lostintravel.di
 
-import android.app.Application
 import android.content.Context
-import com.chrisroid.lostintravel.data.local.UserPreferences
-import com.chrisroid.lostintravel.data.remote.FirebaseAuthProvider
-import com.chrisroid.lostintravel.data.repository.AuthRepository
-import com.chrisroid.lostintravel.data.repository.FirebaseAuthRepositoryImpl
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import com.chrisroid.lostintravel.data.api.ApiClient
+import com.chrisroid.lostintravel.data.api.TravelApiService
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,24 +19,24 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-    @Provides
-    @Singleton
-    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
-        return UserPreferences(context)
-    }
+    // Create the DataStore extension property
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth {
-        return FirebaseAuth.getInstance()
-    }
 
-    @Provides
-    @Singleton
-    fun provideAuthRepository(
-        firebaseAuthProvider: FirebaseAuthProvider,
-        userPreferences: UserPreferences
-    ): AuthRepository {
-        return FirebaseAuthRepositoryImpl(firebaseAuthProvider, userPreferences)
-    }
+        @Provides
+        @Singleton
+        fun provideFirebaseAuth(): FirebaseAuth {
+            return Firebase.auth
+        }
+
+        @Provides
+        @Singleton
+        fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+            return context.dataStore
+        }
+
+        @Provides
+        @Singleton
+        fun provideTravelApiService(): TravelApiService = ApiClient.instance
+
 }
