@@ -1,5 +1,10 @@
 package com.chrisroid.lostintravel.ui.home
 
+import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,8 +60,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.bumptech.glide.Glide
+import com.chrisroid.lostintravel.GetRecommendedPlacesQuery
 import com.chrisroid.lostintravel.domain.model.Destination
 import com.chrisroid.lostintravel.viewmodel.HomeViewModel
 import com.chrisroid.lostintravel.R
@@ -72,38 +80,39 @@ import kotlin.random.Random
 @Composable
 fun HomeScreen(
     onSignOut: () -> Unit,
-    onNavigateToDetail: (Place) -> Unit,
+    onNavigateToDetail: (GetRecommendedPlacesQuery.RecommendedPlace) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val destinations by viewModel.destinations.collectAsState()
+    val recommended by viewModel.recommendedPlacesState.collectAsState()
+
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    HomeScreen2(
-        onNavigateToDetail = onNavigateToDetail
-    )
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-@Composable
-fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit) {
-
     var isRefreshing by remember { mutableStateOf(false) }
+    var showSwipeHint by remember { mutableStateOf(true) }
+
 
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
 
     // Run side effect when refreshing is triggered
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            delay(1500) // simulate refresh
             isRefreshing = false
         }
+    }
+
+    LaunchedEffect(Unit) {
+        delay(3000)
+        showSwipeHint = false
     }
 
     SwipeRefresh(
         state = swipeRefreshState,
         onRefresh = {
             isRefreshing = true
+            viewModel.loadRecommendedPlaces()
+            isRefreshing = false
         }
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
@@ -127,7 +136,7 @@ fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Welcome $userName,",
+                            text = "Welcome userName,",
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontFamily = GoogleSansDisplay,
                                 fontWeight = FontWeight.W400,
@@ -149,6 +158,18 @@ fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit
                                 color = Color.Gray
                             ),
                         )
+                            AnimatedVisibility(
+                                visible = showSwipeHint,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                Text(
+                                    text = "↻ Swipe down to refresh recommendations",
+                                    color = Color.Gray,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
                     }
                 }
                 Row {
@@ -234,7 +255,7 @@ fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit
                     PlaceCardHorizontal(
                         place = place,
                         isFavorite = favorites[index],
-                        onClick = { onNavigateToDetail(place) }
+                        onClick = { }
                     )
                 }
             }
@@ -255,18 +276,27 @@ fun HomeScreen2(userName: String = "Samira", onNavigateToDetail: (Place) -> Unit
             val favorites1 = remember {
                 List(frequentlyVisited.size) { Random.nextBoolean() }
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                itemsIndexed(recommendedPlaces) { index, place ->
-                    PlaceCardVertical(
-                        place = place,
-                        isFavorite = favorites1[index],
-                        onClick = { onNavigateToDetail(place) }
-                    )
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (error != null) {
+                Text("Error: $error", color = Color.Red)
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    recommended.orEmpty().forEach { place ->
+                        place?.let {
+                            RecommendedPlaceCard(place = it, onClick = { onNavigateToDetail(it) })
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+
+
 
 
 
@@ -395,7 +425,10 @@ fun PlaceCardHorizontal(place: Place, isFavorite: Boolean, onClick: () -> Unit) 
 
 
 @Composable
-fun PlaceCardVertical(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
+fun RecommendedPlaceCard(
+    place: GetRecommendedPlacesQuery.RecommendedPlace,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -410,13 +443,20 @@ fun PlaceCardVertical(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = place.image),
-                contentDescription = null,
+            AndroidView(
+                factory = { context ->
+                    ImageView(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(80, 80)
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        Glide.with(this)
+                            .load(place.imageUrl)
+                            .placeholder(R.drawable.placeholder) // Optional
+                            .into(this)
+                    }
+                },
                 modifier = Modifier
                     .size(80.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
+                    .clip(RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -425,13 +465,15 @@ fun PlaceCardVertical(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
                 modifier = Modifier
                     .weight(1f)
             ) {
-                Text(
-                    text = place.title,
-                    fontFamily = FontFamily(Font(R.font.google_sans_regular)),
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    color = Color.Black
-                )
+                place.leadingDestinationTitle?.let {
+                    Text(
+                        text = it,
+                        fontFamily = FontFamily(Font(R.font.google_sans_regular)),
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp,
+                        color = Color.Black
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -443,11 +485,13 @@ fun PlaceCardVertical(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = place.location,
-                        color = Color.Gray,
-                        fontSize = 12.sp
-                    )
+                    place.subDestinationTitle?.let {
+                        Text(
+                            text = it,
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
 
@@ -455,7 +499,7 @@ fun PlaceCardVertical(place: Place, isFavorite: Boolean, onClick: () -> Unit) {
                 Icon(
                     imageVector = Icons.Outlined.FavoriteBorder,
                     contentDescription = null,
-                    tint = if (isFavorite) Color.Red else Color.Gray,
+                    tint = Color.Gray,
                     modifier = Modifier.size(20.dp)
                 )
 

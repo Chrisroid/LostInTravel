@@ -12,6 +12,7 @@ import com.chrisroid.lostintravel.domain.model.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,8 +23,7 @@ class HomeViewModel @Inject constructor(
     private val _destinations = MutableStateFlow<List<Destination>>(emptyList())
     val destinations: StateFlow<List<Destination>> = _destinations
 
-    var graphQLResponseModel: MutableLiveData<List<GetRecommendedPlacesQuery.RecommendedPlace?>?> = MutableLiveData()
-
+    val recommendedPlacesState = MutableStateFlow<List<GetRecommendedPlacesQuery.RecommendedPlace>>(emptyList())
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -31,22 +31,22 @@ class HomeViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
     init {
-        loadDestinations()
+        loadRecommendedPlaces()
     }
 
-    fun loadDestinations() {
+    fun loadRecommendedPlaces() {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
             try {
-                val apiResponse = authRepository.getRecommendedPlaces()
-                graphQLResponseModel.postValue(apiResponse)
+                val token = authRepository.getToken().first()
+                val result = authRepository.getRecommendedPlacesWithToken(token)
+                recommendedPlacesState.value = result?.filterNotNull() ?: emptyList()
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to load destinations"
-//                _isLoading.value = false
+                _error.value = e.message
             } finally {
                 _isLoading.value = false
             }
         }
     }
+
 }

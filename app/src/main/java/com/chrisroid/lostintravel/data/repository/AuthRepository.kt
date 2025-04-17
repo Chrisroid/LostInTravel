@@ -59,9 +59,14 @@ class AuthRepository @Inject constructor(
 
     fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 
-    suspend fun getRecommendedPlaces(): List<GetRecommendedPlacesQuery.RecommendedPlace?>? {
-        return apolloClient.query(GetRecommendedPlacesQuery()).execute().data?.RecommendedPlaces
+    suspend fun getRecommendedPlacesWithToken(token: String): List<GetRecommendedPlacesQuery.RecommendedPlace?>? {
+        val response = apolloClient.query(GetRecommendedPlacesQuery())
+            .addHttpHeader("Authorization", token)
+            .execute()
+
+        return response.data?.RecommendedPlaces
     }
+
 
     suspend fun googleLogin(googleIdToken : String): String?{
         val response = apolloClient

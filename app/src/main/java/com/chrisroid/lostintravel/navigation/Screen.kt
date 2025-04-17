@@ -57,7 +57,7 @@ fun LostInTravelApp() {
                     authViewModel.signOut()
                 },
                 onNavigateToDetail = { place ->
-                    navController.navigate("detail/${place.title}")
+                    navController.navigate("detail/${place.leadingDestinationTitle}")
                 }
             )
         }
