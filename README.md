@@ -8,7 +8,7 @@ LostInTravel is a curated travel inspiration app that demonstrates clean archite
 ## ✨ Features
 
 - ✅ **Email/Password Authentication**
-- ✅ **JWT Token Persistence using DataStore**
+- ✅ **bearer Token Persistence using DataStore**
 - ✅ **Apollo GraphQL Integration**
 - ✅ **Recommended Destinations UI (Figma Matching)**
 - ✅ **Pull-to-Refresh (SwipeRefresh)**
@@ -56,11 +56,6 @@ LostInTravel is a curated travel inspiration app that demonstrates clean archite
 | Persistence | DataStore |
 | Images | Glide |
 
-## 📸 Screenshots
-
-| Login Screen | Home Screen |
-| --- | --- |
-| *(Add screenshots here)* | *(Add screenshots here)* |
 
 ## 🧱 Architecture
 
@@ -100,11 +95,11 @@ com.chrisroid.lostintravel
 ## 🧪 Testing
 * Manual tests on Android 10 and 12
 * Confirmed GraphQL headers contain valid token
-* Verified DataStore retains login state and JWT
+* Verified DataStore retains login state and Bearer
 * Pull-to-refresh re-fetches recommended places
 
 ## 📜 License
 MIT License
 
-**Built with ❤️ by [Your Name]**
+**Built with ❤️ by Chris Asarhasa**
 ```
